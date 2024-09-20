@@ -18,17 +18,16 @@ namespace amymath
     using rlVector2 = ::Vector2;
 
     template<std::floating_point T>
-    constexpr Vector2<T> operator+(const T &value, const Vector2<T> &v);
+    constexpr amymath::Vector2<T> operator+(const T &value, const amymath::Vector2<T> &v);
 
     template<std::floating_point T>
-    constexpr Vector2<T> operator-(const T &value, const Vector2<T>& v);
+    constexpr amymath::Vector2<T> operator-(const T &value, const amymath::Vector2<T>& v);
 
     template<std::floating_point T>
-    constexpr Vector2<T> operator*(const T &value, const Vector2<T>& v);
+    constexpr amymath::Vector2<T> operator*(const T &value, const amymath::Vector2<T>& v);
 
     template<std::floating_point T>
-    constexpr Vector2<T> operator/(const T &value, const Vector2<T>& v);
-
+    constexpr amymath::Vector2<T> operator/(const T &value, const amymath::Vector2<T>& v);
 
     template<std::floating_point T>
     struct Vector2
@@ -254,27 +253,25 @@ namespace amymath
     //                       1            2            3            4           5           6
     // ```
     // multiply power by b's power divide by position
-    template<unsigned n>
+    template<size_t N>
     constexpr auto BinomialExpansion()
     {
         // (coef, aPow, bPow)
-        std::array<std::tuple<unsigned, unsigned, unsigned>, n + 1> result;
-        unsigned coef = 1;
-        unsigned aPow = n;
-        unsigned bPow = 0;
+        std::array<std::tuple<size_t, size_t, size_t>, N + 1> result;
+        size_t coef = 1;
+        size_t aPow = N;
+        size_t bPow = 0; 
         result[0] = std::tuple(coef, aPow, bPow);
-        for (unsigned i = 1; i <= n; ++i)
+        for (size_t i = 1; i <= N; ++i)
         {
-            coef = (coef * (aPow--)) / (++bPow);
+            coef = coef * aPow-- / ++bPow;
             result[i] = std::tuple(coef, aPow, bPow);
         }
         return result;
     }
 
     constexpr auto test1 = BinomialExpansion<5>();
-    constexpr auto test2 = BinomialExpansion<6>();
-
-    static_assert(BinomialExpansion<5>() == std::array<std::tuple<unsigned, unsigned, unsigned>, 6>({
+    static_assert(BinomialExpansion<5>() == std::array<std::tuple<size_t, size_t, size_t>, 6>({
         {  1, 5, 0, },
         {  5, 4, 1, },
         { 10, 3, 2, },
@@ -283,7 +280,8 @@ namespace amymath
         {  1, 0, 5, },
     }));
 
-    static_assert(BinomialExpansion<6>() == std::array<std::tuple<unsigned, unsigned, unsigned>, 7>({
+    constexpr auto test2 = BinomialExpansion<6>();
+    static_assert(BinomialExpansion<6>() == std::array<std::tuple<size_t, size_t, size_t>, 7>({
         {  1, 6, 0, },
         {  6, 5, 1, },
         { 15, 4, 2, },
@@ -293,34 +291,60 @@ namespace amymath
         {  1, 0, 6, },
     }));
 
-    template<std::floating_point T>
-    constexpr Vector2<T> operator+(const T &value, const Vector2<T>& v)
+    template<amymath::numeric T>
+    consteval size_t cpow(const T base, const size_t exponent) {
+        T result = 1;
+        for (size_t i = 1; i <= exponent; ++i) { result *= base; }
+        return result;
+    }
+
+    template<size_t N, amymath::numeric T>
+    consteval T ExpandBinomial(const T a, const T b)
     {
-        Vector2 result = { value + v.x, value + v.y };
+        size_t coef = 1;
+        size_t aPow = N;
+        size_t bPow = 0;
+        T result = coef * cpow(a, aPow) * cpow(b, bPow);
+        for (size_t i = 1; i <= N; ++i)
+        {
+            coef = coef * aPow-- / ++bPow;
+            result += static_cast<T>(coef) * cpow(a, aPow) * cpow(b, bPow);
+        }
+        return result;
+    }
+
+    constexpr auto testx = ExpandBinomial<2>(3, 4);
+    constexpr auto testy = 3*3 + 2*3*4 + 4*4;
+    static_assert(ExpandBinomial<2>(3, 4) == (3*3 + 2*3*4 + 4*4));
+
+    template<std::floating_point T>
+    constexpr amymath::Vector2<T> operator+(const T &value, const amymath::Vector2<T>& v)
+    {
+        amymath::Vector2 result = { value + v.x, value + v.y };
 
         return result;
     }
     
     template<std::floating_point T>
-    constexpr Vector2<T> operator-(const T &value, const Vector2<T>& v)
+    constexpr amymath::Vector2<T> operator-(const T &value, const amymath::Vector2<T>& v)
     {
-        Vector2 result = { value - v.x, value - v.y };
+        amymath::Vector2 result = { value - v.x, value - v.y };
 
         return result;
     }
     
     template<std::floating_point T>
-    constexpr Vector2<T> operator*(const T &value, const Vector2<T>& v)
+    constexpr amymath::Vector2<T> operator*(const T &value, const amymath::Vector2<T>& v)
     {
-        Vector2 result = { value * v.x, value * v.y };
+        amymath::Vector2 result = { value * v.x, value * v.y };
 
         return result;
     }
     
     template<std::floating_point T>
-    constexpr Vector2<T> operator/(const T &value, const Vector2<T>& v)
+    constexpr amymath::Vector2<T> operator/(const T &value, const amymath::Vector2<T>& v)
     {
-        Vector2 result = { value / v.x, value / v.y };
+        amymath::Vector2 result = { value / v.x, value / v.y };
 
         return result;
     }
