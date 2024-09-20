@@ -1,13 +1,12 @@
 #pragma once
 #include <concepts>
-#include <cmath>
-#include <cstdlib>
-#include <limits>
 
 namespace amymath
 {
-    template<class T>
-    concept numeric = std::disjunction_v<std::is_integral<T>, std::is_floating_point<T>>;
+    // Handle name collision
+#ifdef RL_VECTOR2_TYPE
+    using rlVector2 = ::Vector2;
+#endif
 
     template<std::floating_point T = float>
     struct Vector2;
@@ -42,5 +41,3 @@ namespace amymath
     template<std::floating_point T = float>
     struct Transform3D;
 }
-
-#include "vector2.hpp"

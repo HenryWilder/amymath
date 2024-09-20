@@ -15,15 +15,21 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="amymath-cpp.hpp">
+    <ClInclude Include="types.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="vector2.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="const_math.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="amymath.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="amymath-cpp.cpp">
+    <ClCompile Include="amymath.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
