@@ -1,9 +1,22 @@
 #pragma once
 #include "amymath-cpp.hpp"
 #include <format>
+#include <array>
+
+#if !defined(RL_VECTOR2_TYPE)
+extern "C" {
+    typedef struct Vector2 {
+        float x;
+        float y;
+    } Vector2;
+    #define RL_VECTOR2_TYPE
+}
+#endif
 
 namespace amymath
 {
+    using rlVector2 = ::Vector2;
+
     template<std::floating_point T>
     constexpr Vector2<T> operator+(const T &value, const Vector2<T> &v);
 
@@ -31,6 +44,11 @@ namespace amymath
             y(static_cast<T>(from.y))
         {}
 
+        constexpr Vector2(const rlVector2 &from) :
+            x(static_cast<T>(from.x)),
+            y(static_cast<T>(from.y))
+        {}
+
         template<std::integral U>
         constexpr Vector2(const Vector2i<U> &from) :
             x(static_cast<T>(from.x)),
@@ -45,6 +63,13 @@ namespace amymath
 
         T x = (T)0.0;
         T y = (T)0.0;
+
+        constexpr operator rlVector2() const {
+            return rlVector2 {
+                static_cast<float>(x),
+                static_cast<float>(y),
+            };
+        }
 
         constexpr Vector2 operator+(const Vector2 &other) const
         {
@@ -215,6 +240,59 @@ namespace amymath
         }
     };
 
+    // ```
+    //       n   1   n   0   2   -   +    3   -   +    4   -   +   5   -   +   6   -   +
+    // (a+b)^5 = 1 a^5 b^0 + 5 a^4 b^1 + 10 a^3 b^2 + 10 a^2 b^3 + 5 a^1 b^4 + 1 a^0 b^5
+    //                       5            4            3           2           1    <- a^{} previous
+    //           1    *     ---     *    ---     *    ---    *    ---    *    --- 
+    //                       1            2            3           4           5    <- b^{} current
+    // 
+    //       n   1   n   0   2   -   +    3   -   +    4   -   +    5   -   +   6   -   +   7   -   +
+    // (a+b)^6 = 1 a^6 b^0 + 6 a^5 b^1 + 15 a^4 b^2 + 20 a^3 b^3 + 15 a^2 b^4 + 6 a^1 b^5 + 1 a^0 b^6
+    //                       6            5            4            3           2           1
+    //           1     *    ---     *    ---     *    ---    *     ---    *    ---    *    ---
+    //                       1            2            3            4           5           6
+    // ```
+    // multiply power by b's power divide by position
+    template<unsigned n>
+    constexpr auto BinomialExpansion()
+    {
+        // (coef, aPow, bPow)
+        std::array<std::tuple<unsigned, unsigned, unsigned>, n + 1> result;
+        unsigned coef = 1;
+        unsigned aPow = n;
+        unsigned bPow = 0;
+        result[0] = std::tuple(coef, aPow, bPow);
+        for (unsigned i = 1; i <= n; ++i)
+        {
+            coef = (coef * (aPow--)) / (++bPow);
+            result[i] = std::tuple(coef, aPow, bPow);
+        }
+        return result;
+    }
+
+    constexpr auto test1 = BinomialExpansion<5>();
+    constexpr auto test2 = BinomialExpansion<6>();
+
+    static_assert(BinomialExpansion<5>() == std::array<std::tuple<unsigned, unsigned, unsigned>, 6>({
+        {  1, 5, 0, },
+        {  5, 4, 1, },
+        { 10, 3, 2, },
+        { 10, 2, 3, },
+        {  5, 1, 4, },
+        {  1, 0, 5, },
+    }));
+
+    static_assert(BinomialExpansion<6>() == std::array<std::tuple<unsigned, unsigned, unsigned>, 7>({
+        {  1, 6, 0, },
+        {  6, 5, 1, },
+        { 15, 4, 2, },
+        { 20, 3, 3, },
+        { 15, 2, 4, },
+        {  6, 1, 5, },
+        {  1, 0, 6, },
+    }));
+
     template<std::floating_point T>
     constexpr Vector2<T> operator+(const T &value, const Vector2<T>& v)
     {
@@ -247,17 +325,17 @@ namespace amymath
         return result;
     }
 }
-    
-template<std::floating_point T>
-struct std::formatter<amymath::Vector2<T>>
-{
-    constexpr auto parse(std::format_parse_context& ctx)
-    {
-        return ctx.begin();
-    }
 
-    auto format(const amymath::Vector2<T>& obj, std::format_context& ctx) const
-    {
-        return std::format_to(ctx.out(), "({}, {})", obj.x, obj.y);
-    }
-};
+// template<std::floating_point T>
+// struct std::formatter<amymath::Vector2<T>>
+// {
+//     constexpr auto parse(std::format_parse_context& ctx)
+//     {
+//         return ctx.begin();
+//     }
+
+//     auto format(const amymath::Vector2<T>& obj, std::format_context& ctx) const
+//     {
+//         return std::format_to(ctx.out(), "({}, {})", obj.x, obj.y);
+//     }
+// };
