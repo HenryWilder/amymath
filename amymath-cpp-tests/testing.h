@@ -100,7 +100,7 @@ namespace test_exceptions
 #define Assert(condition, msg) { if (!(condition)) { throw test_exceptions::FailedAssertionException(__func__, __LINE__, msg, #condition); } }
 
 #define _AssertCmp(cmp, lhs, rhs, msg) { if (!((lhs) cmp (rhs))) { \
-    throw test_exceptions::FailedComparisonException(__func__, __LINE__, msg, (#lhs" "#cmp" "#rhs), std::string(lhs), std::string(rhs)); } \
+    throw test_exceptions::FailedComparisonException(__func__, __LINE__, msg, (#lhs" "#cmp" "#rhs), std::format("{}", lhs), std::format("{}", rhs)); } \
 }
 
 #define AssertEq(lhs, rhs, msg) _AssertCmp(==, lhs, rhs, msg)

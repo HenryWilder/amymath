@@ -6,7 +6,9 @@ using namespace amymath;
 
 void Test1()
 {
-    AssertEq("apple", "orange", "string equality");
+    Vector2 x(2.0, 3.0);
+    Vector2 y(3.0, 3.0);
+    AssertEq(x, y, "test");
 }
 
 int main()

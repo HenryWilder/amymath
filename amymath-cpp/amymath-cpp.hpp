@@ -42,3 +42,5 @@ namespace amymath
     template<std::floating_point T = float>
     struct Transform3D;
 }
+
+#include "vector2.hpp"
