@@ -9,7 +9,7 @@ static void Test1()
 
 static void Test2()
 {
-
+    std::cout << (MathExpr::Prod({ 1_mx, 5_mx, 3_mx / 2_mx, 6_mx - 7_mx, 6_mx, 3_mx })).ToString() << '\n';
 }
 
 Test_t calcTests[] = {

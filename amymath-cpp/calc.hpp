@@ -1,7 +1,7 @@
 #pragma once
 #include <optional>
 #include <variant>
-#include <memory>
+#include <vector>
 #include <string>
 #include <format>
 
@@ -23,69 +23,48 @@ namespace amymath::calc
     class MathExpr
     {
     private:
-        enum class Tag {
-            Var, Num, Neg, Add, Mul, Div, Pow,
-        } tag;
+        enum class Tag { Var, Num, Neg, Add, Mul, Div, Pow, } tag;
         char var;
         size_t num;
-        std::unique_ptr<MathExpr> lhs, rhs;
+        std::vector<MathExpr> par;
 
-        MathExpr(Tag tag, const MathExpr& lhs, const MathExpr& rhs) :
-            tag(tag),
-            var(),
-            num(),
-            lhs(std::make_unique<MathExpr>(lhs)),
-            rhs(std::make_unique<MathExpr>(rhs))
-        {}
-
-        MathExpr(Tag tag, std::nullptr_t lhs, const MathExpr& rhs) :
-            tag(tag),
-            var(),
-            num(),
-            lhs(),
-            rhs(std::make_unique<MathExpr>(rhs))
-        {}
-
-        MathExpr(Tag tag, const MathExpr& lhs, std::nullptr_t rhs) :
-            tag(tag),
-            var(),
-            num(),
-            lhs(std::make_unique<MathExpr>(lhs)),
-            rhs()
+        constexpr MathExpr(Tag tag, std::initializer_list<MathExpr> par) :
+            tag(tag), num(), var(), par(par)
         {}
 
     public:
         constexpr MathExpr(size_t num) :
-            tag(Tag::Num),
-            num(num),
-            var(),
-            lhs(),
-            rhs()
+            tag(Tag::Num), num(num), var(), par()
         {}
 
         constexpr MathExpr(char var) :
-            tag(Tag::Num),
-            num(),
-            var(var),
-            lhs(),
-            rhs()
+            tag(Tag::Num), num(), var(var), par()
         {}
 
-        MathExpr(const MathExpr& other) :
+        constexpr MathExpr(const MathExpr& other) :
             tag(other.tag),
             var(other.var),
             num(other.num),
-            lhs(other.lhs ? std::make_unique<MathExpr>(*other.lhs) : nullptr),
-            rhs(other.rhs ? std::make_unique<MathExpr>(*other.rhs) : nullptr)
+            par(other.par)
         {}
 
-        MathExpr operator-() const { return MathExpr(Tag::Neg, nullptr, *this); }
-        MathExpr operator+(const MathExpr& other) const { return MathExpr(Tag::Add, *this,  other); }
-        MathExpr operator-(const MathExpr& other) const { return MathExpr(Tag::Add, *this, -other); }
-        MathExpr operator*(const MathExpr& other) const { return MathExpr(Tag::Mul, *this,  other); }
-        MathExpr operator/(const MathExpr& other) const { return MathExpr(Tag::Div, *this,  other); }
-        MathExpr operator^(const MathExpr& other) const { return MathExpr(Tag::Pow, *this,  other); }
+        MathExpr operator-() const { return MathExpr(Tag::Neg, { *this }); }
+        MathExpr operator+(const MathExpr& other) const { return MathExpr(Tag::Add, { *this,  other }); }
+        MathExpr operator-(const MathExpr& other) const { return MathExpr(Tag::Add, { *this, -other }); }
+        MathExpr operator*(const MathExpr& other) const { return MathExpr(Tag::Mul, { *this,  other }); }
+        MathExpr operator/(const MathExpr& other) const { return MathExpr(Tag::Div, { *this,  other }); }
+        MathExpr operator^(const MathExpr& other) const { return MathExpr(Tag::Pow, { *this,  other }); }
 
+        static MathExpr Sum(std::initializer_list<MathExpr> items)
+        {
+            return MathExpr(Tag::Add, items);
+        }
+
+        static MathExpr Prod(std::initializer_list<MathExpr> items)
+        {
+            return MathExpr(Tag::Mul, items);
+        }
+        
         MathExpr Sqrt() const;
 
         std::string ToString() const;
@@ -95,17 +74,22 @@ namespace amymath::calc
     {
         return MathExpr(num);
     }
-
-    MathExpr operator+(const MathExpr& a, size_t b);
-    MathExpr operator-(const MathExpr& a, size_t b);
-    MathExpr operator*(const MathExpr& a, size_t b);
-    MathExpr operator/(const MathExpr& a, size_t b);
-    MathExpr operator^(const MathExpr& a, size_t b);
-    MathExpr operator+(size_t a, const MathExpr& b);
-    MathExpr operator-(size_t a, const MathExpr& b);
-    MathExpr operator*(size_t a, const MathExpr& b);
-    MathExpr operator/(size_t a, const MathExpr& b);
-    MathExpr operator^(size_t a, const MathExpr& b);
+        
+    inline MathExpr MathExpr::Sqrt() const
+    {
+        return (*this)^(1_mx / 2_mx);
+    }
+    
+    inline MathExpr operator+(const MathExpr& a, size_t b) { return a + MathExpr(b); }
+    inline MathExpr operator-(const MathExpr& a, size_t b) { return a - MathExpr(b); }
+    inline MathExpr operator*(const MathExpr& a, size_t b) { return a * MathExpr(b); }
+    inline MathExpr operator/(const MathExpr& a, size_t b) { return a / MathExpr(b); }
+    inline MathExpr operator^(const MathExpr& a, size_t b) { return a ^ MathExpr(b); }
+    inline MathExpr operator+(size_t a, const MathExpr& b) { return MathExpr(a) + b; }
+    inline MathExpr operator-(size_t a, const MathExpr& b) { return MathExpr(a) - b; }
+    inline MathExpr operator*(size_t a, const MathExpr& b) { return MathExpr(a) * b; }
+    inline MathExpr operator/(size_t a, const MathExpr& b) { return MathExpr(a) / b; }
+    inline MathExpr operator^(size_t a, const MathExpr& b) { return MathExpr(a) ^ b; }
 
     using FormulaResult = std::optional<Solution>;
 
