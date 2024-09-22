@@ -27,9 +27,15 @@
     <ClInclude Include="amymath.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="calc.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="amymath.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="calc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

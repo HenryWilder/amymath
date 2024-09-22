@@ -1,9 +1,4 @@
-#include <iostream>
-#include <amymath.hpp>
-#include "testing.h"
-
-// namespace alias
-namespace amy { using namespace amymath; }
+#include "categories.h"
 
 constexpr auto test1 = amy::BinomialExpansion<5>();
 static_assert(amy::BinomialExpansion<5>() == std::array<std::tuple<size_t, size_t, size_t>, 6>({
